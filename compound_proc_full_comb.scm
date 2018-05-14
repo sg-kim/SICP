@@ -33,3 +33,4 @@ enum_1
 enum_2
 ;Value 13: (5 6 7 8)
 
+(map (lambda (i) (map (lambda (j) (list i j)) enum_2)) enum_1)
