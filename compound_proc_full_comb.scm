@@ -16,21 +16,67 @@ Image saved on Monday May 19, 2014 at 9:55:33 PM
       (cons init (enumerate-interval (+ init 1) end))
       )
 )
-;Value: enumerate-interval
-
-(enumerate-interval 0 9)
-;Value 11: (0 1 2 3 4 5 6 7 8)
 
 (define enum_1 (enumerate-interval 0 4))
-;Value: enum_1
-
-enum_1
-;Value 12: (0 1 2 3)
 
 (define enum_2 (enumerate-interval 5 9))
-;Value: enum_2
+
+enum_1
 
 enum_2
-;Value 13: (5 6 7 8)
+;Value: enumerate-interval
+
+;Value: enum_1
+
+;Value: enum_2
+
+;Value 30: (0 1 2 3)
+
+;Value 31: (5 6 7 8)
+
 
 (map (lambda (i) (map (lambda (j) (list i j)) enum_2)) enum_1)
+;Value 32: (((0 5) (0 6) (0 7) (0 8)) ((1 5) (1 6) (1 7) (1 8)) ((2 5) (2 6) (2 7) (2 8)) ((3 5) (3 6) (3 7) (3 8)))
+
+
+(define comb_1 (map (lambda (i) (map (lambda (j) (list i j)) enum_2)) enum_1))
+;Value: comb_1
+
+
+(define (append list_a list_b)
+  (if (null? list_a) list_b
+      (cons (car list_a) (append (cdr list_a) list_b))
+      )
+)
+;Value: append
+
+
+(car comb_1)
+;Value 33: ((0 5) (0 6) (0 7) (0 8))
+
+
+(cdr comb_1)
+;Value 34: (((1 5) (1 6) (1 7) (1 8)) ((2 5) (2 6) (2 7) (2 8)) ((3 5) (3 6) (3 7) (3 8)))
+
+
+(append (car comb_1) (cadr comb_1))
+;Value 35: ((0 5) (0 6) (0 7) (0 8) (1 5) (1 6) (1 7) (1 8))
+
+
+(define (accumulate op init seq)
+  (if (null? seq) init
+      (accumulate op (op init (car seq)) (cdr seq))
+      )
+)
+;Value: accumulate
+
+
+(accumulate + 0 (list 1 2 3))
+;Value: 6
+
+
+(accumulate append () (map (lambda (i) (map (lambda (j) (list i j)) enum_2)) enum_1))
+;Value 36: ((0 5) (0 6) (0 7) (0 8) (1 5) (1 6) (1 7) (1 8) (2 5) (2 6) (2 7) (2 8) (3 5) (3 6) (3 7) (3 8))
+
+
+
