@@ -58,6 +58,39 @@ Image saved on Monday May 19, 2014 at 9:55:33 PM
 )
 ;Value: make-connector
 
+(define (for-each-except exception procedure list)
+  (define (loop items)
+    (cond
+     ((null? items) 'done)
+     ((equal? (car items) exception) (loop (cdr items)))
+     (else (procedure (car items)) (loop (cdr items)))
+     )
+    )
+  (loop list)
+)
+;Value: for-each-except
+
+(define (inform-about-value constraint) (constraint 'I-have-a-value))
+(define (inform-about-no-value constraint) (constraint 'I-lost-my-value))
+;Value: inform-about-value
+
+;Value: inform-about-no-value
+
+(define (has-value? connector) (connector 'has-value?))
+(define (get-value connector) (connector 'value))
+(define (set-value! connector new-value informant) ((connector 'set-value!) new-value informant))
+(define (forget-value! connector retractor) ((connector 'forget) retractor))
+(define (connect connector new-constraint) ((connector 'connect) new-constraint))
+;Value: has-value?
+
+;Value: get-value
+
+;Value: set-value!
+
+;Value: forget-value!
+
+;Value: connect
+
 (define (multiplier m1 m2 product)
   (define (process-new-value)
     (cond
@@ -121,27 +154,6 @@ Image saved on Monday May 19, 2014 at 9:55:33 PM
 )
 ;Value: adder
 
-(define (inform-about-value constraint) (constraint 'I-have-a-value))
-(define (inform-about-no-value constraint) (constraint 'I-lost-my-value))
-;Value: inform-about-value
-
-;Value: inform-about-no-value
-
-(define (has-value? connector) (connector 'has-value?))
-(define (get-value connector) (connector 'value))
-(define (set-value! connector new-value informant) ((connector 'set-value!) new-value informant))
-(define (forget-value! connector retractor) ((connector 'forget) retractor))
-(define (connect connector new-constraint) ((connector 'connect) new-constraint))
-;Value: has-value?
-
-;Value: get-value
-
-;Value: set-value!
-
-;Value: forget-value!
-
-;Value: connect
-
 (define (constant value connector)
   (define (me op)
     (error "undefined op -- CONSTANT - " op)
@@ -204,26 +216,6 @@ Image saved on Monday May 19, 2014 at 9:55:33 PM
 ;Value: celsius-fahrenheit-converter
 
 (celsius-fahrenheit-converter C F)
-;Unbound variable: for-each-except
-;To continue, call RESTART with an option number:
-; (RESTART 3) => Specify a value to use instead of for-each-except.
-; (RESTART 2) => Define for-each-except to a given value.
-; (RESTART 1) => Return to read-eval-print level 1.
-;Start debugger? (y or n): n
-
-(define (for-each-except exception procedure list)
-  (define (loop items)
-    (cond
-     ((null? items) 'done)
-     ((equal? (car items) exception) (loop (cdr items)))
-     (else (procedure (car items)) (loop (cdr items)))
-     )
-    )
-  (loop list)
-)
-;Value: for-each-except
-
-(celsius-fahrenheit-converter C F)
 ;Value: ok
 
 (probe "Celsius temp" C)
@@ -241,7 +233,6 @@ Probe: Fahrenheit temp = 77
 (set-value! F 212 'user)
 ;Contradiction -  (77 212)
 ;To continue, call RESTART with an option number:
-; (RESTART 2) => Return to read-eval-print level 2.
 ; (RESTART 1) => Return to read-eval-print level 1.
 ;Start debugger? (y or n): n
 
