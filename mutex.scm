@@ -11,8 +11,62 @@ Image saved on Monday May 19, 2014 at 9:55:33 PM
 ;`C-h' means: hold down the Ctrl key and type `h'.
 ;Package: (user)
 
-(>= 1 1)
-;Value: #t
+(define (clear! cell) (set-car! cell false))
+;Value: clear!
+
+
+(define (test-and-set! cell)
+  (if (car cell) true
+      (begin
+	(set-car! cell true)
+	false
+	)
+      )
+)
+;Value: test-and-set!
+
+
+(define (make-mutex)
+  (let (
+	(cell (list false))
+	)
+    (define (the-mutex op)
+      (cond
+       ((equal? op 'acquire) 
+	(if (test-and-set! cell) (the-mutex 'acquire))
+	(display '(mutex acquired))
+	)
+       ((equal? op 'release) 
+	(clear! cell)
+	(display '(mutex released))
+	)
+       )
+      )
+    the-mutex
+    )
+)
+;Value: make-mutex
+
+
+(define (make-serializer)
+  (let (
+	(mutex (make-mutex))
+	)
+    (lambda (p)
+      (define (serialized-p . args)
+	(mutex 'acquire)
+	(let (
+	      (val (apply p args))
+	      )
+	  (mutex 'release)
+	  val
+	  )
+	)
+      serialized-p
+      )
+    )
+)
+;Value: make-serializer
 
 
 (define (make-account-and-serializer balance)
@@ -36,10 +90,20 @@ Image saved on Monday May 19, 2014 at 9:55:33 PM
        (else (error "Undefined operation -- MAKE-ACC-AND-SERIALIZER -" op))
        )
       )
+    dispatch
     )
-  dispatch
 )
 ;Value: make-account-and-serializer
+
+(define (exchange acc1 acc2)
+  (let (
+	(diff (- (acc1 'balance) (acc2 'balance))))
+    (cond
+     ((<= diff 0) ((acc1 'deposit) (abs diff)) ((acc2 'withdraw) (abs diff)))
+     (else ((acc1 'withdraw) diff) ((acc2 'deposit) diff)))
+    )
+)
+;Value: exchange
 
 (define (serialized-exchange acc1 acc2)
   (let (
@@ -50,77 +114,26 @@ Image saved on Monday May 19, 2014 at 9:55:33 PM
 )
 ;Value: serialized-exchange
 
-(define (exchange acc1 acc2)
-  (let (
-	(diff (- (acc1 'balance) (acc2 'balance))))
-    (cond
-     ((<= diff 0) ((acc1 'deposit) diff) ((acc2 'withdraw) diff))
-     (else ((acc1 'withdraw) diff) ((acc2 'withdraw) diff)))
-    )
-)
-;Value: exchange
+(define acc1 (make-account-and-serializer 50))
+(define acc2 (make-account-and-serializer 100))
+;Value: acc1
 
-(define (make-mutex)
-  (let (
-	(cell (list false)))
-    (define (the-mutex m)
-      (cond
-       ((equal? m 'acquire)
-	(if (test-and-set! cell) (the-mutex 'acquire)))
-       ((equal? m 'release) (clear! cell)))
-      )
-    the-mutex
-    )
-)
-;Value: make-mutex
+;Value: acc2
 
-(define (clear! cell) (set-car! cell false))
-;Value: clear!
+(acc1 'balance)
+(acc2 'balance)
+;Value: 50
 
-(define (test-and-set! cell)
-  (cond
-   ((equal? cell false) (set-car! cell true))
-   (else true))
-)
-;Value: test-and-set!
+;Value: 100
 
-(define (make-serializer)
-  (let (
-	(mutex (make-mutex))
-	)
-    (lambda (p)
-      (define (serialized-p . args)
-	(mutex 'acquired)
-	(let (
-	      (val (apply p args))
-	      )
-	  (mutex 'release)
-	  val
-	  )
-	)
-      serialized-p
-      )
-    )
-)
-;Value: make-serializer
+(serialized-exchange acc1 acc2)
+(mutex acquired)(mutex acquired)(mutex released)(mutex released)
+;Value: 100
 
-(define (make-serializer)
-  (let (
-	(mutex (make-mutex))
-	)
-    (lambda (p)
-      (define (serialized-p . args)
-	(mutex 'acquire)
-	(let (
-	      (val (apply p args))
-	      )
-	  (mutex 'release)
-	  val
-	  )
-	)
-      serialized-p
-      )
-    )
-)
-;Value: make-serializer
+
+(acc1 'balance)
+(acc2 'balance)
+;Value: 100
+
+;Value: 50
 
