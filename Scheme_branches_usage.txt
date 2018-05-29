@@ -1,0 +1,17 @@
+﻿● if
+(if <predicate> <consequent> <alternative>)
+
+● cond
+(cond	(<p1> <e1>)
+	(<p2> <e2>)
+	...
+	(<pn> <en>)
+)
+
+● let
+(let   ((<var1> <exp1>)
+	(<var2> <exp2>)
+	...
+	(<varn> <expn>))
+	<body>
+)
